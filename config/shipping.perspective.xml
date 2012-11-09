@@ -1,0 +1,27 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<perspective>
+	<models>
+		<updatemodel name="modules_generic/rootfolder">
+			<addchild model="modules_mondialrelay/mondialrelaymode" />
+			<adddrop model="modules_mondialrelay/mondialrelaymode" action="move" />
+			<addcontextaction name="createMondialrelaymode" group="create_" before="" />
+		</updatemodel>
+		<updatemodel name="modules_generic/folder">
+			<addchild model="modules_mondialrelay/mondialrelaymode" />
+			<adddrop model="modules_mondialrelay/mondialrelaymode" action="move" />
+			<addcontextaction name="createMondialrelaymode" group="create_" before="" />
+		</updatemodel>
+		<model name="modules_mondialrelay/mondialrelaymode">
+			<contextactions>
+				<contextaction name="edit"/>
+				<contextaction name="delete"/>
+				<contextaction name="deactivated"/>
+				<contextaction name="reactivate"/>
+			</contextactions>
+		</model>
+	</models>
+	<actions>
+		<action name="createMondialrelaymode" single="true" permission="Insert_mondialrelaymode" icon="add" 
+			label="&amp;modules.mondialrelay.bo.actions.Createmondialrelaymode;"/>
+	</actions>
+</perspective>

@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="utf-8"?>
+<i18n baseKey="m.mondialrelay.document.mondialrelaymode" lcid="fr_FR">
+  <include id="m.shipping.document.mode"/>
+  <key id="framebaseurl">url de base du service</key>
+  <key id="vendorcode">Code du vendeur</key>
+  <key id="vendorcode-help">code sur 10 caractères</key>
+  <key id="vendorprivatekey">clé privée</key>
+  <key id="relay-label">relais {codeReference}</key>
+</i18n>
