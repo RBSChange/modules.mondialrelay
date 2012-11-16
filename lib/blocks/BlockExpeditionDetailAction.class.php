@@ -27,64 +27,25 @@ class mondialrelay_BlockExpeditionDetailAction extends shipping_BlockExpeditionD
 	
 	protected function getRelayDetail()
 	{
-		$result = array();
-		$result['openingHours'] = '';
-		$result['planUrl'] = null;
-		$result['pictureUrl'] = null;
-		$result['coordinate'] = null;
-		$result['locationHint'] = null;
+		$relay = null;
 		
 		$crc = strtoupper(md5($this->param['vendorCode'] . $this->param['relayCode'] . $this->param['countryCode'] . $this->param['vendorPrivateKeyCode']));
 		
 		$soapClient = $this->param['soapClient'];
 		
-		$params = array('Enseigne' => $this->param['vendorCode'], 'Num' => $this->param['relayCode'], 'Pays' => $this->param['countryCode'], 'Security' => $crc);
+		$params = array('Enseigne' => $this->param['vendorCode'], 'Num' => $this->param['relayCode'], 'Pays' => $this->param['countryCode'], 
+			'Security' => $crc);
 		$resultSoap = $soapClient->WSI2_DetailPointRelais($params);
+		$result = $resultSoap->WSI2_DetailPointRelaisResult;
 		
-		$status = $resultSoap->WSI2_DetailPointRelaisResult->STAT;
+		$status = $result->STAT;
 		
-		if ($status != '0')
+		if ($status == '0')
 		{
-			$result['error'] = $this->getStatusLabel($this->param['vendorCode'], $status, $this->param['lang'], $this->param['vendorPrivateKeyCode']);
-		}
-		else
-		{
-			$openingHours = array();
-			$openingHours[] = $this->extractOpeningHour($resultSoap->WSI2_DetailPointRelaisResult->Horaires_Lundi->string);
-			$openingHours[] = $this->extractOpeningHour($resultSoap->WSI2_DetailPointRelaisResult->Horaires_Mardi->string);
-			$openingHours[] = $this->extractOpeningHour($resultSoap->WSI2_DetailPointRelaisResult->Horaires_Mercredi->string);
-			$openingHours[] = $this->extractOpeningHour($resultSoap->WSI2_DetailPointRelaisResult->Horaires_Jeudi->string);
-			$openingHours[] = $this->extractOpeningHour($resultSoap->WSI2_DetailPointRelaisResult->Horaires_Vendredi->string);
-			$openingHours[] = $this->extractOpeningHour($resultSoap->WSI2_DetailPointRelaisResult->Horaires_Samedi->string);
-			$openingHours[] = $this->extractOpeningHour($resultSoap->WSI2_DetailPointRelaisResult->Horaires_Dimanche->string);
-			$result['openingHours'] = $openingHours;
-			
-			$result['planUrl'] = $resultSoap->WSI2_DetailPointRelaisResult->URL_Plan;
-			
-			$urlPhoto = $resultSoap->WSI2_DetailPointRelaisResult->URL_Photo;
-			if ($urlPhoto != null && $urlPhoto != '')
-			{
-				$result['pictureUrl'] = $urlPhoto;
-			}
-			
-			$locationHint1 = $resultSoap->WSI2_DetailPointRelaisResult->Localisation1;
-			$locationHint2 = $resultSoap->WSI2_DetailPointRelaisResult->Localisation2;
-			
-			if ($locationHint1 != null && $locationHint1 != '')
-			{
-				$result['locationHint'] = $locationHint1;
-			}
-			if ($locationHint2 != null && $locationHint2 != '')
-			{
-				if ($result['locationHint'] != null)
-				{
-					$result['locationHint'] .= '<br/>';
-				}
-				$result['locationHint'] .= $locationHint2;
-			}
+			$relay = mondialrelay_MondialrelaymodeService::getInstance()->getRelayFromSoapObject($result);
 		}
 		
-		return $result;
+		return $relay;
 	}
 	
 	protected function getTrackingDetail($trackingNumber)
@@ -94,7 +55,8 @@ class mondialrelay_BlockExpeditionDetailAction extends shipping_BlockExpeditionD
 		$soapClient = $this->param['soapClient'];
 		
 		$crc = strtoupper(md5($this->param['vendorCode'] . $trackingNumber . $this->param['lang'] . $this->param['vendorPrivateKeyCode']));
-		$params = array('Enseigne' => $this->param['vendorCode'], 'Expedition' => $trackingNumber, 'Langue' => $this->param['lang'], 'Security' => $crc);
+		$params = array('Enseigne' => $this->param['vendorCode'], 'Expedition' => $trackingNumber, 'Langue' => $this->param['lang'], 
+			'Security' => $crc);
 		$resultSoap = $soapClient->WSI2_TracingColisDetaille($params);
 		
 		$status = $resultSoap->WSI2_TracingColisDetailleResult->STAT;
@@ -127,44 +89,6 @@ class mondialrelay_BlockExpeditionDetailAction extends shipping_BlockExpeditionD
 		}
 		
 		return $result;
-	}
-	
-	/**
-	 * Extract opening hours from raw hours data
-	 * @param array $hours
-	 * @return string
-	 */
-	protected function extractOpeningHour($hours)
-	{
-		$ls = LocaleService::getInstance();
-		$result = '';
-		if ($hours[0] == '0000' && $hours[2] == '0000')
-		{
-			$result = $ls->transFO('m.shipping.general.closed');
-		}
-		else
-		{
-			$result = $ls->transFO('m.shipping.general.opening-hours', array('ucf'), array('hour1' => $this->formatHour($hours[0]), 
-				'hour2' => $this->formatHour($hours[1])));
-			
-			if ($hours[2] != '0000')
-			{
-				$result .= ' ';
-				$result .= $ls->transFO('m.shipping.general.and');
-				$result .= ' ';
-				$result .= $ls->transFO('m.shipping.general.opening-hours', array(), array('hour1' => $this->formatHour($hours[2]), 
-					'hour2' => $this->formatHour($hours[3])));
-			}
-		}
-		
-		return $result;
-	}
-	
-	protected function formatHour($hour)
-	{
-		$h = substr($hour, 0, 2);
-		$m = substr($hour, 2);
-		return $h . ':' . $m;
 	}
 	
 	protected function getStatusLabel($vendorCode, $statusId, $lang, $vendorPrivateKeyCode)

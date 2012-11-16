@@ -117,5 +117,92 @@ class mondialrelay_MondialrelaymodeService extends shipping_RelayModeService
 		//	$raw_hash_string_tpl = "<{vendorcode}>{zipCode}{countryCode}<{vendorprivatekey}>";
 		return md5('<' . $mode->getVendorcode() . '>' . $zipCode . $countryCode . '<' . $mode->getVendorprivatekey() . '>');
 	}
-
+	
+	/**
+	 * Construct a shipping_Relay from soap object
+	 * @param object $soapObject
+	 */
+	public function getRelayFromSoapObject($soapObject)
+	{
+		$relay = new shipping_Relay();
+		
+		$relay->setRef($soapObject->Num);
+		$relay->setName($soapObject->LgAdr1);
+		$relay->setAddressLine1($soapObject->LgAdr3);
+		$relay->setZipCode($soapObject->CP);
+		$relay->setCity($soapObject->Ville);
+		$relay->setCountryCode($soapObject->Pays);
+		
+		$openingHours = array();
+		$openingHours[] = $this->extractOpeningHour($soapObject->Horaires_Lundi->string);
+		$openingHours[] = $this->extractOpeningHour($soapObject->Horaires_Mardi->string);
+		$openingHours[] = $this->extractOpeningHour($soapObject->Horaires_Mercredi->string);
+		$openingHours[] = $this->extractOpeningHour($soapObject->Horaires_Jeudi->string);
+		$openingHours[] = $this->extractOpeningHour($soapObject->Horaires_Vendredi->string);
+		$openingHours[] = $this->extractOpeningHour($soapObject->Horaires_Samedi->string);
+		$openingHours[] = $this->extractOpeningHour($soapObject->Horaires_Dimanche->string);
+		$relay->setOpeningHours($openingHours);
+		
+		$relay->setMapUrl($soapObject->URL_Plan);
+		
+		$urlPhoto = $soapObject->URL_Photo;
+		if ($urlPhoto != null && $urlPhoto != '')
+		{
+			$relay->setPictureUrl($urlPhoto);
+		}
+		
+		$locationHint1 = $soapObject->Localisation1;
+		$locationHint2 = $soapObject->Localisation2;
+		$locationHint = null;
+		
+		if ($locationHint1 != null && $locationHint1 != '')
+		{
+			$locationHint = $locationHint1;
+		}
+		if ($locationHint2 != null && $locationHint2 != '')
+		{
+			$locationHint .= $locationHint2;
+		}
+		$relay->setLocationHint($locationHint);
+		
+		return $relay;
+	}
+	
+	/**
+	 * Extract opening hours from raw hours data
+	 * @param array $hours
+	 * @return string
+	 */
+	protected function extractOpeningHour($hours)
+	{
+		$ls = LocaleService::getInstance();
+		$result = '';
+		if ($hours[0] == '0000' && $hours[2] == '0000')
+		{
+			$result = $ls->transFO('m.shipping.general.closed');
+		}
+		else
+		{
+			$result = $ls->transFO('m.shipping.general.opening-hours', array('ucf'), array('hour1' => $this->formatHour($hours[0]), 
+				'hour2' => $this->formatHour($hours[1])));
+			
+			if ($hours[2] != '0000')
+			{
+				$result .= ' ';
+				$result .= $ls->transFO('m.shipping.general.and');
+				$result .= ' ';
+				$result .= $ls->transFO('m.shipping.general.opening-hours', array(), array('hour1' => $this->formatHour($hours[2]), 
+					'hour2' => $this->formatHour($hours[3])));
+			}
+		}
+		
+		return $result;
+	}
+	
+	protected function formatHour($hour)
+	{
+		$h = substr($hour, 0, 2);
+		$m = substr($hour, 2);
+		return $h . ':' . $m;
+	}
 }

@@ -6,6 +6,7 @@
 		<icon>package</icon>
 	</module>
 	<project>
+		<entry name="useFrame">false</entry> <!-- Can be true -->
 		<entry name="frameBaseUrl">http://www.mondialrelay.com/lg_fr/espaces/url/frame_pr_kit.aspx</entry>
 		<entry name="webserviceUrl">http://www.mondialrelay.fr/WebService/Web_Services.asmx</entry>
 	</project>
