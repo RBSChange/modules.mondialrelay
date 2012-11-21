@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<script>
+	<binding fileName="modules/website/persistentdocument/import/website_binding.xml" />
+
+	<documentRef byDocumentId-attr="" type-attr="">
+		<page label="Détail d'une expédition via Mondial Relay" isIndexPage="false" indexingstatus="false" navigationVisibility="hidden"
+			byTag="contextual_website_website_modules_mondialrelay_mondialrelayexpedition">
+			<changecontent for="content-block">
+				<changeblock type="modules_mondialrelay_ExpeditionDetail" />
+			</changecontent>
+		</page>
+	</documentRef>
+</script>

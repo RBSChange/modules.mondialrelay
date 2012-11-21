@@ -9,11 +9,11 @@
 	<license>os</license>
 	<repository>public</repository>
 	<dependencies>
-		<!--<dependency>
-			<name>change-lib/framework</name>
+		<dependency>
+			<name>change-module/shipping</name>
 			<versions>
 				<version>3.6.3</version>
 			</versions>
-		</dependency>-->
+		</dependency>
 	</dependencies>
 </change>
