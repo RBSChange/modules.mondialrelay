@@ -5,6 +5,9 @@
  */
 class mondialrelay_GetFrameStylesheetAction extends shipping_GetFrameStylesheetAction
 {
+	/**
+	 * @return string
+	 */
 	protected function getStylesheetName()
 	{
 		return 'modules.mondialrelay.frame';

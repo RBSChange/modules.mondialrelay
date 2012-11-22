@@ -61,7 +61,6 @@ class mondialrelay_MondialrelaymodeService extends shipping_RelayModeService
 	{
 		return array('mondialrelay', 'MondialRelayModeConfiguration');
 	}
-	
 	protected function getDetailExpeditionPageTagName()
 	{
 		return 'contextual_website_website_modules_mondialrelay_mondialrelayexpedition';
@@ -106,7 +105,6 @@ class mondialrelay_MondialrelaymodeService extends shipping_RelayModeService
 	}
 	
 	/**
-	 *
 	 * @param mondialrelay_persistentdocument_mondialrelaymode $mode
 	 * @param string $zipCode
 	 * @param string $countryCode
@@ -121,6 +119,7 @@ class mondialrelay_MondialrelaymodeService extends shipping_RelayModeService
 	/**
 	 * Construct a shipping_Relay from soap object
 	 * @param object $soapObject
+	 * @return shipping_Relay
 	 */
 	public function getRelayFromSoapObject($soapObject)
 	{
@@ -183,22 +182,25 @@ class mondialrelay_MondialrelaymodeService extends shipping_RelayModeService
 		}
 		else
 		{
-			$result = $ls->transFO('m.shipping.general.opening-hours', array('ucf'), array('hour1' => $this->formatHour($hours[0]), 
-				'hour2' => $this->formatHour($hours[1])));
+			$result = $ls->transFO('m.shipping.general.opening-hours', array('ucf'), array(
+				'hour1' => $this->formatHour($hours[0]), 'hour2' => $this->formatHour($hours[1])));
 			
 			if ($hours[2] != '0000')
 			{
 				$result .= ' ';
 				$result .= $ls->transFO('m.shipping.general.and');
 				$result .= ' ';
-				$result .= $ls->transFO('m.shipping.general.opening-hours', array(), array('hour1' => $this->formatHour($hours[2]), 
+				$result .= $ls->transFO('m.shipping.general.opening-hours', array(), array('hour1' => $this->formatHour($hours[2]),
 					'hour2' => $this->formatHour($hours[3])));
 			}
 		}
-		
 		return $result;
 	}
 	
+	/**
+	 * @param string $hour
+	 * @return string
+	 */
 	protected function formatHour($hour)
 	{
 		$h = substr($hour, 0, 2);

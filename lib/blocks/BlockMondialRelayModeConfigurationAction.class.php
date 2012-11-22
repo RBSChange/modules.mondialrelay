@@ -5,7 +5,9 @@
  */
 class mondialrelay_BlockMondialRelayModeConfigurationAction extends shipping_BlockRelayModeConfigurationAction
 {
-	
+	/**
+	 * @return string|null
+	 */
 	protected function buildFrameUrl()
 	{
 		$useFrame = Framework::getConfigurationValue('modules/mondialrelay/useFrame');
@@ -18,7 +20,7 @@ class mondialrelay_BlockMondialRelayModeConfigurationAction extends shipping_Blo
 	
 	/**
 	 * Return the list of shipping_Relay
-	 * @return array<shipping_Relay>
+	 * @return shipping_Relay[]
 	 */
 	protected function buildRelayList()
 	{
@@ -55,9 +57,6 @@ class mondialrelay_BlockMondialRelayModeConfigurationAction extends shipping_Blo
 				$relays[] = $relay;
 			}
 		}
-		
 		return $relays;
-	
 	}
-
 }
