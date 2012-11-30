@@ -38,25 +38,36 @@ class mondialrelay_BlockMondialRelayModeConfigurationAction extends shipping_Blo
 			'CP' => $this->param['zipcode'], 'Security' => $crc);
 		
 		$relays = array();
-		
-		$resultSoap = $soapClient->WSI2_RecherchePointRelaisHoraires($params);
-		$result = $resultSoap->WSI2_RecherchePointRelaisHorairesResult;
-		
-		$status = $result->STAT;
-		if ($status == '0')
+		try
 		{
-			$list = $result->ListePR->ret_WSI2_sub_PointRelaisHoraires;
-			foreach ($list as $item)
+			$resultSoap = $soapClient->WSI2_RecherchePointRelaisHoraires($params);
+		}
+		catch (Exception $e)
+		{
+			Framework::exception($e);
+		}
+		
+		if ($resultSoap != null)
+		{
+			$result = $resultSoap->WSI2_RecherchePointRelaisHorairesResult;
+			
+			$status = $result->STAT;
+			if ($status == '0')
 			{
-				$relay = mondialrelay_MondialrelaymodeService::getInstance()->getRelayFromSoapObject($item);
-				
-				list($latitude, $longitude) = gmaps_ModuleService::getInstance()->getCoordinatesForAddress($relay->getAddress());
-				$relay->setLatitude($latitude);
-				$relay->setLongitude($longitude);
-				
-				$relays[] = $relay;
+				$list = $result->ListePR->ret_WSI2_sub_PointRelaisHoraires;
+				foreach ($list as $item)
+				{
+					$relay = mondialrelay_MondialrelaymodeService::getInstance()->getRelayFromSoapObject($item);
+					
+					list ($latitude, $longitude) = gmaps_ModuleService::getInstance()->getCoordinatesForAddress($relay->getAddress());
+					$relay->setLatitude($latitude);
+					$relay->setLongitude($longitude);
+					
+					$relays[] = $relay;
+				}
 			}
 		}
+		
 		return $relays;
 	}
 }

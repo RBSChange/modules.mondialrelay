@@ -37,16 +37,29 @@ class mondialrelay_BlockExpeditionDetailAction extends shipping_BlockExpeditionD
 		
 		$soapClient = $this->param['soapClient'];
 		
-		$params = array('Enseigne' => $this->param['vendorCode'], 'Num' => $this->param['relayCode'], 
-			'Pays' => $this->param['countryCode'], 'Security' => $crc);
-		$resultSoap = $soapClient->WSI2_DetailPointRelais($params);
-		$result = $resultSoap->WSI2_DetailPointRelaisResult;
+		$params = array('Enseigne' => $this->param['vendorCode'], 'Num' => $this->param['relayCode'], 'Pays' => $this->param['countryCode'], 
+			'Security' => $crc);
 		
-		$status = $result->STAT;
-		
-		if ($status == '0')
+		$resultSoap = null;
+		try
 		{
-			$relay = mondialrelay_MondialrelaymodeService::getInstance()->getRelayFromSoapObject($result);
+			$resultSoap = $soapClient->WSI2_DetailPointRelais($params);
+		}
+		catch (Exception $e)
+		{
+			Framework::exception($e);
+		}
+		
+		if ($resultSoap != null)
+		{
+			$result = $resultSoap->WSI2_DetailPointRelaisResult;
+			
+			$status = $result->STAT;
+			
+			if ($status == '0')
+			{
+				$relay = mondialrelay_MondialrelaymodeService::getInstance()->getRelayFromSoapObject($result);
+			}
 		}
 		
 		return $relay;
@@ -60,37 +73,52 @@ class mondialrelay_BlockExpeditionDetailAction extends shipping_BlockExpeditionD
 	{
 		$result = array();
 		
-		$soapClient = $this->param['soapClient'];
-		
-		$crc = strtoupper(md5($this->param['vendorCode'] . $trackingNumber . $this->param['lang'] . $this->param['vendorPrivateKeyCode']));
-		$params = array('Enseigne' => $this->param['vendorCode'], 'Expedition' => $trackingNumber, 
-			'Langue' => $this->param['lang'], 'Security' => $crc);
-		$resultSoap = $soapClient->WSI2_TracingColisDetaille($params);
-		
-		$status = $resultSoap->WSI2_TracingColisDetailleResult->STAT;
-		
-		if ($status != '0' && $status != '80' && $status != '81' && $status != '82' && $status != '83')
+		if ($trackingNumber != null && $trackingNumber != '')
 		{
-			$result['error'] = $this->getStatusLabel($this->param['vendorCode'], $status, $this->param['lang'], $this->param['vendorPrivateKeyCode']);
-		}
-		else
-		{
-			$result['steps'] = array();
+			$soapClient = $this->param['soapClient'];
 			
-			$trackingLines = $resultSoap->WSI2_TracingColisDetailleResult->Tracing->ret_WSI2_sub_TracingColisDetaille;
+			$crc = strtoupper(md5($this->param['vendorCode'] . $trackingNumber . $this->param['lang'] . $this->param['vendorPrivateKeyCode']));
+			$params = array('Enseigne' => $this->param['vendorCode'], 'Expedition' => $trackingNumber, 'Langue' => $this->param['lang'], 
+				'Security' => $crc);
 			
-			foreach ($trackingLines as $trackingLine)
+			$resultSoap = null;
+			try
 			{
+				$resultSoap = $soapClient->WSI2_TracingColisDetaille($params);
+			}
+			catch (Exception $e)
+			{
+				Framework::exception($e);
+			}
+			
+			if ($resultSoap != null)
+			{
+				$status = $resultSoap->WSI2_TracingColisDetailleResult->STAT;
 				
-				$label = $trackingLine->Libelle;
-				if ($label != null)
+				if ($status != '0' && $status != '80' && $status != '81' && $status != '82' && $status != '83')
 				{
-					$step = array();
-					$step['label'] = $label;
-					$step['date'] = $trackingLine->Date;
-					$step['hour'] = $trackingLine->Heure;
-					$step['place'] = $trackingLine->Emplacement;
-					$result['steps'][] = $step;
+					$result['error'] = $this->getStatusLabel($this->param['vendorCode'], $status, $this->param['lang'], $this->param['vendorPrivateKeyCode']);
+				}
+				else
+				{
+					$result['steps'] = array();
+					
+					$trackingLines = $resultSoap->WSI2_TracingColisDetailleResult->Tracing->ret_WSI2_sub_TracingColisDetaille;
+					
+					foreach ($trackingLines as $trackingLine)
+					{
+						
+						$label = $trackingLine->Libelle;
+						if ($label != null)
+						{
+							$step = array();
+							$step['label'] = $label;
+							$step['date'] = $trackingLine->Date;
+							$step['hour'] = $trackingLine->Heure;
+							$step['place'] = $trackingLine->Emplacement;
+							$result['steps'][] = $step;
+						}
+					}
 				}
 			}
 		}
@@ -112,8 +140,21 @@ class mondialrelay_BlockExpeditionDetailAction extends shipping_BlockExpeditionD
 		$crc = strtoupper(md5($vendorCode . $statusId . $lang . $vendorPrivateKeyCode));
 		$params = array('Enseigne' => $vendorCode, 'STAT_ID' => $statusId, 'Langue' => $lang, 'Security' => $crc);
 		
-		$resultSoap = $soapClient->WSI2_STAT_Label($params);
+		$resultSoap = null;
+		try
+		{
+			$resultSoap = $soapClient->WSI2_STAT_Label($params);
+		}
+		catch (Exception $e)
+		{
+			Framework::exception($e);
+		}
 		
-		return $resultSoap->WSI2_STAT_LabelResult;
+		if ($resultSoap != null)
+		{
+			return $resultSoap->WSI2_STAT_LabelResult;
+		}
+		
+		return '';
 	}
 }
