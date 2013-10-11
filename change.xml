@@ -4,7 +4,7 @@
 	xsi:schemaLocation="http://www.rbs.fr/schema/change-component/1.0 http://www.rbschange.fr/static/schema/change-component/1.0.xsd">
 	<name>mondialrelay</name>
 	<type>change-module</type>
-	<version>3.6.8</version>
+	<version>3.6.9</version>
 	<description>Mondialrelay module</description>
 	<license>os</license>
 	<repository>public</repository>
@@ -12,7 +12,7 @@
 		<dependency>
 			<name>change-module/shipping</name>
 			<versions>
-				<version>3.6.8</version>
+				<version>3.6.9</version>
 			</versions>
 		</dependency>
 	</dependencies>
